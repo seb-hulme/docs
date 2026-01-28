@@ -111,9 +111,12 @@
     }
   },
   "api": {
-    "baseUrl": "https://app.replyify.ai/api",
+    "baseUrl": "https://app.replyify.ai",
     "auth": {
       "method": "bearer"
+    },
+    "playground": {
+      "mode": "show"
     }
   },
   "contextual": {
