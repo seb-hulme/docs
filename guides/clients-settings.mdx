@@ -1,0 +1,174 @@
+---
+title: "Clients & Settings"
+description: "Manage clients and workspace settings"
+icon: "gear"
+---
+
+Replyify supports multi-client management, making it perfect for agencies and businesses managing outreach for multiple brands.
+
+## Managing Clients
+
+### What is a Client?
+
+A client represents a business or brand you're managing email campaigns for. Each client can have:
+
+- **Unique branding**: Name and description
+- **Custom AI settings**: Service description and calendar link
+- **Separate connections**: Dedicated webhook integrations
+- **Independent analytics**: Track performance per client
+
+### Creating a Client
+
+<Steps>
+  <Step title="Navigate to Clients">
+    Click **Clients** in the sidebar to view all clients.
+  </Step>
+  <Step title="Add a new client">
+    Click **Add Client** in the top right.
+  </Step>
+  <Step title="Fill in client details">
+    - **Client Name**: The business or brand name
+    - **Service Description**: What they offer (used for AI responses)
+    - **Calendar Link**: Booking URL for meetings (optional)
+  </Step>
+  <Step title="Configure AI settings">
+    - **AI Reply Mode**: Draft, Auto-Send, or Off
+    - Save your settings
+  </Step>
+</Steps>
+
+### Client Service Description
+
+The service description is critical for AI response quality. Include:
+
+- What the client offers
+- Target audience
+- Unique value proposition
+- Typical outcomes or benefits
+
+<CodeGroup>
+```text Good Example
+We help e-commerce brands increase their email revenue by 30% through
+automated flows and campaign optimization. Our done-for-you service
+includes strategy, copywriting, design, and ongoing management.
+We work best with Shopify stores doing $1M+ in annual revenue.
+```
+
+```text Minimal Example
+E-commerce email marketing agency.
+```
+</CodeGroup>
+
+### Editing Clients
+
+1. Navigate to **Clients**
+2. Click on the client you want to edit
+3. Update the fields as needed
+4. Click **Save Changes**
+
+### Deleting Clients
+
+<Warning>
+Deleting a client is permanent. All associated replies and data will remain but won't be linked to a client.
+</Warning>
+
+## Workspace Settings
+
+Workspace settings control your organization's configuration across all team members.
+
+### Accessing Settings
+
+Click **Settings** in the sidebar to access:
+
+- **Workspace**: Organization name and general info
+- **Account**: Your personal account settings
+- **Team**: Manage team members and roles
+- **Categories**: Customize reply categories
+- **API Keys**: Create and manage API keys
+- **Webhooks**: Configure outgoing webhooks
+
+### Workspace Tab
+
+Configure general workspace settings:
+
+- **Workspace Name**: Your organization's name
+- **Logo**: Upload a custom logo (displayed in the sidebar)
+
+### Account Tab
+
+Manage your personal account:
+
+- **Profile**: Name and email
+- **Password**: Update your password
+- **Notifications**: Email notification preferences
+
+### Categories Tab
+
+Customize how replies are categorized:
+
+**System Categories** (cannot be deleted):
+- Interested
+- Meeting Request
+- Question
+- Not Interested
+- Out of Office
+- Unsubscribe
+- Bounce
+
+**Custom Categories**:
+- Create additional categories for your workflow
+- Set colors for visual organization
+- Define whether AI should generate responses
+
+### API Keys Tab
+
+Create API keys for integrations:
+
+1. Click **Create API Key**
+2. Enter a name for the key
+3. Copy the generated key (shown only once)
+4. Use the key to authenticate API requests
+
+<Warning>
+API keys provide full access to your workspace data. Keep them secure and never share them publicly.
+</Warning>
+
+### Webhooks Tab
+
+Configure outgoing webhooks to receive events from Replyify:
+
+1. Click **Add Webhook**
+2. Enter your webhook URL
+3. Select the events you want to receive
+4. Save and test the webhook
+
+See the [Webhooks documentation](/api-reference/webhooks/overview) for more details.
+
+## Billing
+
+Access billing from the main sidebar:
+
+- **Current Plan**: See your plan and usage
+- **Upgrade/Downgrade**: Change your subscription
+- **Manage Subscription**: Access Stripe portal
+
+<Info>
+Only workspace admins and owners can access billing settings.
+</Info>
+
+### Plan Details
+
+| Plan | AI Replies | Price |
+|------|------------|-------|
+| Free | 0 | $0/mo |
+| Starter | 200 | $197/mo |
+| Growth | 600 | $397/mo |
+| Scale | 1,500 | $697/mo |
+
+### Upgrading
+
+Upgrades take effect immediately. You'll be charged a prorated amount for the remainder of your billing cycle.
+
+### Downgrading
+
+Downgrades take effect at the end of your current billing period. You keep your current plan benefits until then.

@@ -1,0 +1,222 @@
+---
+title: "Webhook Security"
+description: "Verifying and securing webhook deliveries"
+---
+
+Secure your webhook endpoint by verifying that requests genuinely come from Replyify.
+
+## Signature Verification
+
+Every webhook request includes an HMAC-SHA256 signature in the `X-Replyify-Signature` header. Use this to verify the request authenticity.
+
+### How It Works
+
+1. Replyify generates a unique secret for each webhook
+2. Each request is signed using HMAC-SHA256 with this secret
+3. The signature is included in the `X-Replyify-Signature` header
+4. Your server verifies the signature before processing
+
+### Signature Format
+
+```
+X-Replyify-Signature: sha256=abc123def456...
+```
+
+The signature is the HMAC-SHA256 hash of the raw request body, prefixed with `sha256=`.
+
+## Verification Examples
+
+<CodeGroup>
+```javascript Node.js
+const crypto = require('crypto');
+
+function verifySignature(payload, signature, secret) {
+  const expectedSig = 'sha256=' + crypto
+    .createHmac('sha256', secret)
+    .update(payload, 'utf8')
+    .digest('hex');
+
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expectedSig)
+  );
+}
+
+// Express middleware
+app.post('/webhooks/replyify', express.raw({ type: 'application/json' }), (req, res) => {
+  const signature = req.headers['x-replyify-signature'];
+  const payload = req.body.toString();
+
+  if (!verifySignature(payload, signature, process.env.WEBHOOK_SECRET)) {
+    return res.status(401).send('Invalid signature');
+  }
+
+  const event = JSON.parse(payload);
+  // Process event...
+
+  res.status(200).send('OK');
+});
+```
+
+```python Python
+import hmac
+import hashlib
+
+def verify_signature(payload: bytes, signature: str, secret: str) -> bool:
+    expected_sig = 'sha256=' + hmac.new(
+        secret.encode('utf-8'),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+
+    return hmac.compare_digest(signature, expected_sig)
+
+# Flask example
+@app.route('/webhooks/replyify', methods=['POST'])
+def handle_webhook():
+    signature = request.headers.get('X-Replyify-Signature')
+    payload = request.get_data()
+
+    if not verify_signature(payload, signature, os.environ['WEBHOOK_SECRET']):
+        abort(401, 'Invalid signature')
+
+    event = request.get_json()
+    # Process event...
+
+    return 'OK', 200
+```
+
+```ruby Ruby
+require 'openssl'
+
+def verify_signature(payload, signature, secret)
+  expected_sig = 'sha256=' + OpenSSL::HMAC.hexdigest(
+    'sha256',
+    secret,
+    payload
+  )
+
+  Rack::Utils.secure_compare(signature, expected_sig)
+end
+
+# Sinatra example
+post '/webhooks/replyify' do
+  request.body.rewind
+  payload = request.body.read
+  signature = request.env['HTTP_X_REPLYIFY_SIGNATURE']
+
+  unless verify_signature(payload, signature, ENV['WEBHOOK_SECRET'])
+    halt 401, 'Invalid signature'
+  end
+
+  event = JSON.parse(payload)
+  # Process event...
+
+  status 200
+  'OK'
+end
+```
+
+```go Go
+package main
+
+import (
+    "crypto/hmac"
+    "crypto/sha256"
+    "encoding/hex"
+    "io"
+    "net/http"
+    "os"
+)
+
+func verifySignature(payload []byte, signature, secret string) bool {
+    mac := hmac.New(sha256.New, []byte(secret))
+    mac.Write(payload)
+    expectedSig := "sha256=" + hex.EncodeToString(mac.Sum(nil))
+    return hmac.Equal([]byte(signature), []byte(expectedSig))
+}
+
+func webhookHandler(w http.ResponseWriter, r *http.Request) {
+    payload, _ := io.ReadAll(r.Body)
+    signature := r.Header.Get("X-Replyify-Signature")
+
+    if !verifySignature(payload, signature, os.Getenv("WEBHOOK_SECRET")) {
+        http.Error(w, "Invalid signature", http.StatusUnauthorized)
+        return
+    }
+
+    // Process event...
+
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte("OK"))
+}
+```
+</CodeGroup>
+
+## Security Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Always Verify Signatures" icon="shield-check">
+    Never process webhook payloads without verifying the signature first.
+  </Card>
+  <Card title="Use Timing-Safe Comparison" icon="clock">
+    Use constant-time string comparison to prevent timing attacks.
+  </Card>
+  <Card title="Use HTTPS Only" icon="lock">
+    Only use HTTPS endpoints. Replyify will not send webhooks to HTTP URLs.
+  </Card>
+  <Card title="Store Secrets Securely" icon="key">
+    Store webhook secrets in environment variables, not in code.
+  </Card>
+</CardGroup>
+
+## Rotating Secrets
+
+If your webhook secret is compromised:
+
+1. Go to **Settings → Webhooks**
+2. Click on the affected webhook
+3. Click **Regenerate Secret**
+4. Update your server with the new secret
+5. The old secret is immediately invalidated
+
+<Warning>
+After regenerating a secret, any requests signed with the old secret will fail verification. Update your server promptly.
+</Warning>
+
+## IP Allowlisting
+
+For additional security, you can allowlist Replyify's IP addresses. Contact [support@replyify.ai](mailto:support@replyify.ai) for the current list of IP addresses.
+
+## Replay Attack Prevention
+
+To prevent replay attacks, check the timestamp in the payload:
+
+```javascript
+const MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
+
+function isTimestampValid(timestamp) {
+  const eventTime = new Date(timestamp).getTime();
+  const now = Date.now();
+  return Math.abs(now - eventTime) < MAX_AGE_MS;
+}
+
+// In your handler
+const { timestamp } = req.body;
+if (!isTimestampValid(timestamp)) {
+  return res.status(400).send('Request too old');
+}
+```
+
+## Troubleshooting
+
+### "Invalid signature" errors
+
+1. **Check the secret**: Ensure you're using the correct webhook secret
+2. **Check encoding**: Use UTF-8 encoding for the payload
+3. **Check raw body**: Verify the signature against the raw request body, not parsed JSON
+4. **Check for modifications**: Ensure no middleware modifies the body before verification
+
+### Testing signatures locally
+
+Use the test button in **Settings → Webhooks** to send a test event. Log the signature and payload to verify your implementation.

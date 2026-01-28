@@ -1,0 +1,168 @@
+---
+title: "Update Reply"
+api: "PATCH /api/replies/{id}"
+description: "Update a reply's status, category, or draft response"
+---
+
+Update properties of an existing reply, such as changing its category or modifying the draft response.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier (UUID) of the reply
+</ParamField>
+
+## Request Body
+
+<ParamField body="category_id" type="string">
+  Update the reply's category by providing a category UUID
+</ParamField>
+
+<ParamField body="status" type="string">
+  Update the reply status. Options: `pending`, `ready`, `archived`
+
+  <Note>
+  To set status to `sent`, use the [Send Reply](/api-reference/replies/send) endpoint instead.
+  </Note>
+</ParamField>
+
+<ParamField body="ai_response" type="string">
+  Update or set the draft response content
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="object">
+  The updated reply object (same structure as [Get Reply](/api-reference/replies/get))
+</ResponseField>
+
+## Examples
+
+### Change Category
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH "https://app.replyify.ai/api/replies/abc123-def456-ghi789" \
+  -H "Authorization: Bearer rpl_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{"category_id": "cat-interested-456"}'
+```
+
+```javascript JavaScript
+const replyId = 'abc123-def456-ghi789';
+const response = await fetch(
+  `https://app.replyify.ai/api/replies/${replyId}`,
+  {
+    method: 'PATCH',
+    headers: {
+      'Authorization': 'Bearer rpl_your_api_key',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      category_id: 'cat-interested-456'
+    })
+  }
+);
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+reply_id = 'abc123-def456-ghi789'
+response = requests.patch(
+    f'https://app.replyify.ai/api/replies/{reply_id}',
+    headers={'Authorization': 'Bearer rpl_your_api_key'},
+    json={'category_id': 'cat-interested-456'}
+)
+data = response.json()
+```
+</CodeGroup>
+
+### Archive a Reply
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH "https://app.replyify.ai/api/replies/abc123-def456-ghi789" \
+  -H "Authorization: Bearer rpl_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "archived"}'
+```
+
+```javascript JavaScript
+const response = await fetch(
+  `https://app.replyify.ai/api/replies/${replyId}`,
+  {
+    method: 'PATCH',
+    headers: {
+      'Authorization': 'Bearer rpl_your_api_key',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ status: 'archived' })
+  }
+);
+```
+</CodeGroup>
+
+### Update Draft Response
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH "https://app.replyify.ai/api/replies/abc123-def456-ghi789" \
+  -H "Authorization: Bearer rpl_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{"ai_response": "Hi John,\n\nCustomized response here...\n\nBest regards"}'
+```
+
+```javascript JavaScript
+const response = await fetch(
+  `https://app.replyify.ai/api/replies/${replyId}`,
+  {
+    method: 'PATCH',
+    headers: {
+      'Authorization': 'Bearer rpl_your_api_key',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      ai_response: 'Hi John,\n\nCustomized response here...\n\nBest regards'
+    })
+  }
+);
+```
+</CodeGroup>
+
+## Response Example
+
+```json
+{
+  "data": {
+    "id": "abc123-def456-ghi789",
+    "from_email": "john@example.com",
+    "from_name": "John Smith",
+    "status": "archived",
+    "category_id": "cat-interested-456",
+    "ai_response": "Hi John,\n\nCustomized response here...\n\nBest regards",
+    "updated_at": "2024-01-15T16:00:00Z"
+  }
+}
+```
+
+## Errors
+
+<ResponseField name="400 Bad Request">
+  ```json
+  {
+    "error": "Invalid category_id"
+  }
+  ```
+  The provided category ID doesn't exist in your workspace.
+</ResponseField>
+
+<ResponseField name="404 Not Found">
+  ```json
+  {
+    "error": "Reply not found"
+  }
+  ```
+  The specified reply ID doesn't exist in your workspace.
+</ResponseField>

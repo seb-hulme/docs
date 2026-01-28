@@ -1,0 +1,173 @@
+---
+title: "Connections"
+description: "Connect and manage your email sequencers"
+icon: "link"
+---
+
+Connections link Replyify to your email sequencers, allowing replies to flow into your unified inbox automatically.
+
+## Supported Platforms
+
+Replyify integrates with popular cold email platforms:
+
+| Platform | Status | Auth Method |
+|----------|--------|-------------|
+| **Instantly** | Available | API Key |
+| **EmailBison** | Available | API Key + Instance URL |
+| **Lemlist** | Coming Soon | API Key |
+
+## Creating a Connection
+
+### Instantly
+
+<Steps>
+  <Step title="Get your API key">
+    1. Log in to your Instantly account
+    2. Go to Settings → Integrations → API
+    3. Copy your API key
+  </Step>
+  <Step title="Add connection in Replyify">
+    1. Navigate to **Connections** in Replyify
+    2. Click **Add Connection**
+    3. Select **Instantly**
+    4. Enter a name for this connection
+    5. Paste your API key
+    6. Click **Connect**
+  </Step>
+  <Step title="Configure webhook in Instantly">
+    1. Copy the webhook URL from your new connection
+    2. In Instantly, go to Settings → Webhooks
+    3. Add a new webhook with your Replyify URL
+    4. Select "Reply Received" as the event
+    5. Save the webhook
+  </Step>
+</Steps>
+
+### EmailBison
+
+<Steps>
+  <Step title="Get your credentials">
+    1. Log in to your EmailBison account
+    2. Go to Settings → API
+    3. Copy your API key and note your instance URL
+  </Step>
+  <Step title="Add connection in Replyify">
+    1. Navigate to **Connections** in Replyify
+    2. Click **Add Connection**
+    3. Select **EmailBison**
+    4. Enter a name for this connection
+    5. Paste your API key
+    6. Enter your instance URL (e.g., `https://yourcompany.emailbison.com`)
+    7. Click **Connect**
+  </Step>
+  <Step title="Configure webhook in EmailBison">
+    1. Copy the webhook URL from your new connection
+    2. In EmailBison, go to Webhooks
+    3. Add the Replyify URL for reply events
+    4. Save your settings
+  </Step>
+</Steps>
+
+## Managing Connections
+
+### Viewing Connection Details
+
+Click on any connection to see:
+
+- **Status**: Active or paused
+- **Last Event**: When the last reply was received
+- **Webhook URL**: The URL to configure in your sequencer
+- **API Key**: Masked view of your credentials
+
+### Pausing Connections
+
+You can pause a connection temporarily without deleting it:
+
+1. Open the connection details
+2. Click **Pause Connection**
+3. The connection turns inactive
+
+**When to pause:**
+- Troubleshooting webhook issues
+- Temporarily stopping processing for an account
+- Testing a new configuration
+
+<Info>
+Paused connections won't process incoming webhooks. Replies sent to paused connections are ignored.
+</Info>
+
+### Deleting Connections
+
+<Warning>
+Deleting a connection is permanent. All associated data remains, but the webhook URL will stop working.
+</Warning>
+
+To delete a connection:
+1. Open the connection details
+2. Click **Delete Connection**
+3. Confirm the deletion
+
+## Webhook Configuration
+
+### Webhook URL Format
+
+Each connection has a unique webhook URL:
+
+```
+https://app.replyify.ai/api/webhooks/{platform}/{connectionId}
+```
+
+<Tip>
+Always copy the full URL including the connection ID. The ID is required to route replies to the correct connection.
+</Tip>
+
+### Webhook Events
+
+Configure your sequencer to send these events:
+
+| Event | Required | Description |
+|-------|----------|-------------|
+| Reply Received | Yes | When someone replies to your email |
+| Email Opened | Optional | Track open rates |
+| Link Clicked | Optional | Track engagement |
+
+<Note>
+While Replyify can receive open and click events, the primary functionality focuses on **Reply Received** events.
+</Note>
+
+### Testing Webhooks
+
+After setting up a connection:
+
+1. Send a test campaign from your sequencer
+2. Reply to the test email
+3. Check Replyify inbox for the reply
+4. Verify the connection shows "Last Event" updated
+
+## Multiple Connections
+
+You can connect multiple accounts and platforms:
+
+**Use cases:**
+- Different sequencers for different clients
+- Multiple Instantly accounts for scale
+- Consolidating replies from various tools
+
+<Tip>
+Each connection has its own webhook URL, so you can route replies from different accounts to appropriate clients.
+</Tip>
+
+## Troubleshooting
+
+### Connection Not Receiving Replies
+
+1. **Verify webhook URL**: Ensure the full URL is copied correctly
+2. **Check webhook configuration**: Confirm "Reply" events are selected
+3. **Test manually**: Reply to a campaign email and wait 1-2 minutes
+4. **Check connection status**: Ensure the connection isn't paused
+
+### "Invalid API Key" Error
+
+1. Regenerate your API key in the sequencer
+2. Update the connection in Replyify with the new key
+3. Save and test again

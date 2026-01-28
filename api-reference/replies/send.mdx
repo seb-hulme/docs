@@ -1,0 +1,208 @@
+---
+title: "Send Reply"
+api: "POST /api/replies/{id}/send"
+description: "Send a response to a reply"
+---
+
+Send a response email to the original sender. This marks the reply as `sent` and records the sent response.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier (UUID) of the reply
+</ParamField>
+
+## Request Body
+
+<ParamField body="response" type="string" required>
+  The email content to send. Can be plain text or HTML.
+</ParamField>
+
+<ParamField body="to_email" type="string">
+  Override the recipient email address (defaults to the original sender)
+</ParamField>
+
+<ParamField body="cc" type="array">
+  Array of email addresses to CC
+</ParamField>
+
+<ParamField body="bcc" type="array">
+  Array of email addresses to BCC
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="object">
+  The updated reply object with status set to `sent`
+  <Expandable>
+    <ResponseField name="id" type="string">
+      Reply UUID
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      Updated to `sent`
+    </ResponseField>
+    <ResponseField name="sent_response" type="string">
+      The response content that was sent
+    </ResponseField>
+    <ResponseField name="handled_at" type="string">
+      ISO timestamp when the reply was sent
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Examples
+
+### Send with Default Response
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://app.replyify.ai/api/replies/abc123-def456-ghi789/send" \
+  -H "Authorization: Bearer rpl_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "response": "Hi John,\n\nThanks for your interest! I would be happy to schedule a call.\n\nHere is my calendar: https://cal.com/yourcompany\n\nBest,\nYour Team"
+  }'
+```
+
+```javascript JavaScript
+const replyId = 'abc123-def456-ghi789';
+const response = await fetch(
+  `https://app.replyify.ai/api/replies/${replyId}/send`,
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer rpl_your_api_key',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      response: `Hi John,
+
+Thanks for your interest! I would be happy to schedule a call.
+
+Here is my calendar: https://cal.com/yourcompany
+
+Best,
+Your Team`
+    })
+  }
+);
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+reply_id = 'abc123-def456-ghi789'
+response = requests.post(
+    f'https://app.replyify.ai/api/replies/{reply_id}/send',
+    headers={'Authorization': 'Bearer rpl_your_api_key'},
+    json={
+        'response': '''Hi John,
+
+Thanks for your interest! I would be happy to schedule a call.
+
+Here is my calendar: https://cal.com/yourcompany
+
+Best,
+Your Team'''
+    }
+)
+data = response.json()
+```
+</CodeGroup>
+
+### Send with CC/BCC
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://app.replyify.ai/api/replies/abc123-def456-ghi789/send" \
+  -H "Authorization: Bearer rpl_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "response": "Hi John,\n\nHere is the information you requested...",
+    "cc": ["manager@yourcompany.com"],
+    "bcc": ["records@yourcompany.com"]
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch(
+  `https://app.replyify.ai/api/replies/${replyId}/send`,
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer rpl_your_api_key',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      response: 'Hi John,\n\nHere is the information you requested...',
+      cc: ['manager@yourcompany.com'],
+      bcc: ['records@yourcompany.com']
+    })
+  }
+);
+```
+</CodeGroup>
+
+## Response Example
+
+```json
+{
+  "data": {
+    "id": "abc123-def456-ghi789",
+    "from_email": "john@example.com",
+    "to_email": "outreach@yourcompany.com",
+    "status": "sent",
+    "sent_response": "Hi John,\n\nThanks for your interest! I would be happy to schedule a call.\n\nHere is my calendar: https://cal.com/yourcompany\n\nBest,\nYour Team",
+    "handled_at": "2024-01-15T16:30:00Z"
+  }
+}
+```
+
+## Errors
+
+<ResponseField name="400 Bad Request">
+  ```json
+  {
+    "error": "Response content is required"
+  }
+  ```
+  The request is missing the `response` field.
+</ResponseField>
+
+<ResponseField name="400 Bad Request">
+  ```json
+  {
+    "error": "Reply already sent"
+  }
+  ```
+  This reply has already been sent and cannot be sent again.
+</ResponseField>
+
+<ResponseField name="404 Not Found">
+  ```json
+  {
+    "error": "Reply not found"
+  }
+  ```
+  The specified reply ID doesn't exist in your workspace.
+</ResponseField>
+
+<ResponseField name="500 Internal Server Error">
+  ```json
+  {
+    "error": "Failed to send email"
+  }
+  ```
+  The email could not be sent through the connected platform.
+</ResponseField>
+
+## Notes
+
+<Info>
+Sending a reply triggers the `reply.sent` webhook event if you have webhooks configured.
+</Info>
+
+<Warning>
+Once a reply is sent, it cannot be unsent or modified. Make sure to review the response before sending.
+</Warning>

@@ -1,0 +1,188 @@
+---
+title: "List Replies"
+api: "GET /api/replies"
+description: "Retrieve a list of replies in your workspace"
+---
+
+Fetch all replies with optional filtering and pagination.
+
+## Query Parameters
+
+<ParamField query="status" type="string">
+  Filter by reply status. Options: `pending`, `ready`, `sent`, `archived`
+</ParamField>
+
+<ParamField query="category_id" type="string">
+  Filter by category UUID
+</ParamField>
+
+<ParamField query="client_id" type="string">
+  Filter by client UUID
+</ParamField>
+
+<ParamField query="connection_id" type="string">
+  Filter by connection UUID
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by email address, name, or subject
+</ParamField>
+
+<ParamField query="limit" type="integer" default="20">
+  Number of replies to return (max 100)
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Number of replies to skip for pagination
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="array">
+  Array of reply objects
+  <Expandable title="Reply Object">
+    <ResponseField name="id" type="string">
+      Unique reply identifier (UUID)
+    </ResponseField>
+    <ResponseField name="from_email" type="string">
+      Sender's email address
+    </ResponseField>
+    <ResponseField name="from_name" type="string">
+      Sender's name (if available)
+    </ResponseField>
+    <ResponseField name="to_email" type="string">
+      Recipient email address
+    </ResponseField>
+    <ResponseField name="subject" type="string">
+      Email subject line
+    </ResponseField>
+    <ResponseField name="body_text" type="string">
+      Plain text email body
+    </ResponseField>
+    <ResponseField name="body_html" type="string">
+      HTML email body (if available)
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      Reply status: `pending`, `ready`, `sent`, `archived`
+    </ResponseField>
+    <ResponseField name="category_id" type="string">
+      Category UUID
+    </ResponseField>
+    <ResponseField name="category" type="object">
+      Category details including name and color
+    </ResponseField>
+    <ResponseField name="ai_response" type="string">
+      AI-generated draft response (if available)
+    </ResponseField>
+    <ResponseField name="sent_response" type="string">
+      The response that was sent (if status is `sent`)
+    </ResponseField>
+    <ResponseField name="client_id" type="string">
+      Associated client UUID
+    </ResponseField>
+    <ResponseField name="connection_id" type="string">
+      Source connection UUID
+    </ResponseField>
+    <ResponseField name="contact_id" type="string">
+      Associated contact UUID
+    </ResponseField>
+    <ResponseField name="received_at" type="string">
+      ISO timestamp when reply was received
+    </ResponseField>
+    <ResponseField name="handled_at" type="string">
+      ISO timestamp when reply was handled (sent/archived)
+    </ResponseField>
+    <ResponseField name="created_at" type="string">
+      ISO timestamp when record was created
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Pagination metadata
+  <Expandable>
+    <ResponseField name="total" type="integer">
+      Total number of matching replies
+    </ResponseField>
+    <ResponseField name="limit" type="integer">
+      Number of replies per page
+    </ResponseField>
+    <ResponseField name="offset" type="integer">
+      Current offset
+    </ResponseField>
+    <ResponseField name="hasMore" type="boolean">
+      Whether more results exist
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Examples
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://app.replyify.ai/api/replies?status=pending&limit=10" \
+  -H "Authorization: Bearer rpl_your_api_key"
+```
+
+```javascript JavaScript
+const response = await fetch(
+  'https://app.replyify.ai/api/replies?status=pending&limit=10',
+  {
+    headers: {
+      'Authorization': 'Bearer rpl_your_api_key'
+    }
+  }
+);
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://app.replyify.ai/api/replies',
+    params={'status': 'pending', 'limit': 10},
+    headers={'Authorization': 'Bearer rpl_your_api_key'}
+)
+data = response.json()
+```
+</CodeGroup>
+
+## Response Example
+
+```json
+{
+  "data": [
+    {
+      "id": "abc123-def456-ghi789",
+      "from_email": "john@example.com",
+      "from_name": "John Smith",
+      "to_email": "outreach@yourcompany.com",
+      "subject": "Re: Quick question about your service",
+      "body_text": "Hi, I'd love to learn more about what you offer...",
+      "body_html": "<p>Hi, I'd love to learn more...</p>",
+      "status": "ready",
+      "category_id": "cat-interested-123",
+      "category": {
+        "id": "cat-interested-123",
+        "name": "Interested",
+        "color": "#10B981"
+      },
+      "ai_response": "Hi John,\n\nThanks for your interest! I'd be happy to share more about...",
+      "sent_response": null,
+      "client_id": "client-456",
+      "connection_id": "conn-789",
+      "contact_id": "contact-012",
+      "received_at": "2024-01-15T14:30:00Z",
+      "handled_at": null,
+      "created_at": "2024-01-15T14:30:05Z"
+    }
+  ],
+  "pagination": {
+    "total": 45,
+    "limit": 10,
+    "offset": 0,
+    "hasMore": true
+  }
+}
+```

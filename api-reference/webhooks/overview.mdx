@@ -1,0 +1,192 @@
+---
+title: "Webhooks Overview"
+description: "Receive real-time events from Replyify"
+---
+
+Webhooks allow you to receive real-time notifications when events occur in Replyify. Instead of polling the API, you can subscribe to events and have them pushed to your server.
+
+## How Webhooks Work
+
+1. **Configure**: Add a webhook URL in **Settings → Webhooks**
+2. **Subscribe**: Select which events you want to receive
+3. **Receive**: Replyify sends HTTP POST requests to your URL when events occur
+4. **Process**: Your server processes the event and responds with 2xx status
+
+## Setting Up Webhooks
+
+<Steps>
+  <Step title="Go to Webhook Settings">
+    Navigate to **Settings → Webhooks** in your dashboard.
+  </Step>
+  <Step title="Add a webhook">
+    Click **Add Webhook** and configure:
+    - **Name**: A descriptive name (e.g., "CRM Integration")
+    - **URL**: Your HTTPS endpoint that will receive events
+    - **Events**: Select which events to subscribe to
+  </Step>
+  <Step title="Copy the secret">
+    Save the webhook secret for verifying signatures (see [Security](/api-reference/webhooks/security)).
+  </Step>
+  <Step title="Test the webhook">
+    Click **Send Test** to verify your endpoint is receiving events correctly.
+  </Step>
+</Steps>
+
+## Webhook Payload
+
+All webhook events are sent as HTTP POST requests with a JSON body:
+
+```json
+{
+  "event": "reply.received",
+  "timestamp": "2024-01-15T14:30:00Z",
+  "workspace_id": "ws-abc123",
+  "data": {
+    // Event-specific data
+  }
+}
+```
+
+### Headers
+
+| Header | Description |
+|--------|-------------|
+| `Content-Type` | `application/json` |
+| `X-Replyify-Signature` | HMAC-SHA256 signature for verification |
+| `X-Replyify-Event` | Event type (e.g., `reply.received`) |
+| `X-Replyify-Delivery-ID` | Unique delivery ID for deduplication |
+
+## Responding to Webhooks
+
+Your endpoint should:
+
+1. **Respond quickly**: Return a 2xx status within 30 seconds
+2. **Process asynchronously**: Queue heavy processing for later
+3. **Handle duplicates**: Use delivery ID for deduplication
+4. **Return appropriate status**:
+   - `200-299`: Success, delivery complete
+   - `4xx`: Client error, no retry
+   - `5xx`: Server error, will retry
+
+## Retry Policy
+
+If your endpoint returns a non-2xx status or times out:
+
+| Attempt | Delay |
+|---------|-------|
+| 1 | Immediate |
+| 2 | 1 minute |
+| 3 | 5 minutes |
+| 4 | 30 minutes |
+| 5 | 2 hours |
+
+After 5 failed attempts, the delivery is marked as failed and logged.
+
+## Example Endpoint
+
+<CodeGroup>
+```javascript Express.js
+const express = require('express');
+const crypto = require('crypto');
+
+const app = express();
+app.use(express.json());
+
+app.post('/webhooks/replyify', (req, res) => {
+  // Verify signature (see Security docs)
+  const signature = req.headers['x-replyify-signature'];
+  const payload = JSON.stringify(req.body);
+  const expectedSig = crypto
+    .createHmac('sha256', process.env.WEBHOOK_SECRET)
+    .update(payload)
+    .digest('hex');
+
+  if (signature !== `sha256=${expectedSig}`) {
+    return res.status(401).send('Invalid signature');
+  }
+
+  // Process the event
+  const { event, data } = req.body;
+
+  switch (event) {
+    case 'reply.received':
+      console.log('New reply:', data.reply_id);
+      // Queue for processing
+      break;
+    case 'reply.sent':
+      console.log('Reply sent:', data.reply_id);
+      break;
+  }
+
+  // Respond immediately
+  res.status(200).send('OK');
+});
+
+app.listen(3000);
+```
+
+```python Flask
+from flask import Flask, request, abort
+import hmac
+import hashlib
+import os
+
+app = Flask(__name__)
+
+@app.route('/webhooks/replyify', methods=['POST'])
+def handle_webhook():
+    # Verify signature
+    signature = request.headers.get('X-Replyify-Signature')
+    payload = request.get_data()
+    expected_sig = 'sha256=' + hmac.new(
+        os.environ['WEBHOOK_SECRET'].encode(),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+
+    if not hmac.compare_digest(signature, expected_sig):
+        abort(401)
+
+    # Process the event
+    data = request.get_json()
+    event = data['event']
+
+    if event == 'reply.received':
+        print(f"New reply: {data['data']['reply_id']}")
+    elif event == 'reply.sent':
+        print(f"Reply sent: {data['data']['reply_id']}")
+
+    return 'OK', 200
+```
+</CodeGroup>
+
+## Managing Webhooks
+
+### Viewing Deliveries
+
+In **Settings → Webhooks**, click on a webhook to see:
+
+- Recent delivery attempts
+- Success/failure status
+- Response codes
+- Payload data
+
+### Pausing Webhooks
+
+Temporarily pause a webhook without deleting it:
+
+1. Open the webhook settings
+2. Toggle **Active** to off
+3. Events won't be sent until re-enabled
+
+### Deleting Webhooks
+
+To delete a webhook:
+
+1. Open the webhook settings
+2. Click **Delete**
+3. Confirm the deletion
+
+<Warning>
+Deleting a webhook immediately stops all event deliveries. Any pending retries are cancelled.
+</Warning>

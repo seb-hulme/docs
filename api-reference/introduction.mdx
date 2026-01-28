@@ -1,33 +1,170 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: "API Introduction"
+description: "Build integrations with the Replyify REST API"
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+The Replyify API allows you to programmatically access your reply data, manage contacts, and integrate Replyify with your existing tools.
 
-## Welcome
+## Base URL
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+All API requests should be made to:
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+```
+https://app.replyify.ai/api
+```
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+The Replyify API uses Bearer token authentication. Include your API key in the `Authorization` header:
+
+```bash
+Authorization: Bearer your_api_key_here
+```
+
+<Warning>
+Keep your API keys secure. Never expose them in client-side code or public repositories.
+</Warning>
+
+## Getting an API Key
+
+1. Go to **Settings → API Keys** in your dashboard
+2. Click **Create API Key**
+3. Give your key a descriptive name
+4. Copy the generated key (shown only once)
+
+<Info>
+API keys are scoped to your workspace. All requests made with a key access data from that workspace only.
+</Info>
+
+## Response Format
+
+All responses are returned as JSON:
 
 ```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+{
+  "data": { ... },
+  "error": null
+}
 ```
+
+Error responses include an error message:
+
+```json
+{
+  "data": null,
+  "error": "Invalid API key"
+}
+```
+
+## HTTP Status Codes
+
+| Code | Description |
+|------|-------------|
+| `200` | Success |
+| `201` | Created |
+| `400` | Bad Request - Invalid parameters |
+| `401` | Unauthorized - Invalid or missing API key |
+| `403` | Forbidden - Insufficient permissions |
+| `404` | Not Found - Resource doesn't exist |
+| `429` | Too Many Requests - Rate limited |
+| `500` | Internal Server Error |
+
+## Rate Limits
+
+API requests are rate limited to ensure fair usage:
+
+| Plan | Requests/minute |
+|------|-----------------|
+| Starter | 60 |
+| Growth | 120 |
+| Scale | 300 |
+
+Rate limit headers are included in all responses:
+
+```
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1640000000
+```
+
+## Pagination
+
+List endpoints support pagination with `limit` and `offset` parameters:
+
+```bash
+GET /api/replies?limit=20&offset=40
+```
+
+| Parameter | Default | Max | Description |
+|-----------|---------|-----|-------------|
+| `limit` | 20 | 100 | Number of items to return |
+| `offset` | 0 | - | Number of items to skip |
+
+Paginated responses include metadata:
+
+```json
+{
+  "data": [...],
+  "pagination": {
+    "total": 150,
+    "limit": 20,
+    "offset": 40,
+    "hasMore": true
+  }
+}
+```
+
+## Available Endpoints
+
+### Replies
+
+- `GET /api/replies` - List all replies
+- `GET /api/replies/:id` - Get a specific reply
+- `PATCH /api/replies/:id` - Update a reply
+- `POST /api/replies/:id/send` - Send a reply
+- `POST /api/replies/:id/forward` - Forward a reply
+
+### Contacts
+
+- `GET /api/contacts` - List all contacts
+- `GET /api/contacts/:id` - Get a specific contact
+
+### Webhooks
+
+Configure outgoing webhooks in **Settings → Webhooks** to receive real-time events.
+
+## Example Request
+
+```bash cURL
+curl -X GET "https://app.replyify.ai/api/replies?status=pending&limit=10" \
+  -H "Authorization: Bearer your_api_key_here" \
+  -H "Content-Type: application/json"
+```
+
+```javascript JavaScript
+const response = await fetch('https://app.replyify.ai/api/replies?status=pending&limit=10', {
+  headers: {
+    'Authorization': 'Bearer your_api_key_here',
+    'Content-Type': 'application/json'
+  }
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://app.replyify.ai/api/replies',
+    params={'status': 'pending', 'limit': 10},
+    headers={'Authorization': 'Bearer your_api_key_here'}
+)
+
+data = response.json()
+```
+
+## Need Help?
+
+- Check the [API Reference](/api-reference/replies/list) for detailed endpoint documentation
+- Contact [support@replyify.ai](mailto:support@replyify.ai) for API questions

@@ -1,0 +1,194 @@
+---
+title: "Troubleshooting"
+description: "Common issues and how to fix them"
+icon: "wrench"
+---
+
+Having issues? This guide covers common problems and their solutions.
+
+## Webhook Issues
+
+### Webhook Not Receiving Replies
+
+If replies aren't appearing in your inbox:
+
+<Steps>
+  <Step title="Verify the webhook URL">
+    Make sure you copied the **full** webhook URL from Replyify, including the connection ID at the end.
+
+    Correct format:
+    ```
+    https://app.replyify.ai/api/webhooks/instantly/abc123-def456
+    ```
+  </Step>
+  <Step title="Check webhook configuration">
+    In your sequencer, ensure:
+    - The webhook is enabled/active
+    - "Reply" events are selected
+    - The URL is saved correctly
+  </Step>
+  <Step title="Confirm connection is active">
+    In Replyify, check that the connection isn't paused:
+    - Go to **Connections**
+    - Verify status shows "Active"
+  </Step>
+  <Step title="Test with a real reply">
+    Send a campaign and reply to it yourself. Wait 1-2 minutes for the webhook to process.
+  </Step>
+</Steps>
+
+### "Connection Not Found" Errors
+
+This means the connection ID in the webhook URL doesn't match any active connection:
+
+1. Go to **Connections** in Replyify
+2. Click on your connection
+3. Copy the webhook URL again
+4. Update it in your sequencer
+
+<Warning>
+If you deleted and recreated a connection, the webhook URL changes. Update your sequencer with the new URL.
+</Warning>
+
+## AI Response Issues
+
+### AI Not Generating Responses
+
+If you're not seeing AI-generated drafts:
+
+<AccordionGroup>
+  <Accordion title="Check your AI reply limit">
+    Go to **Billing** and verify you haven't reached your monthly limit.
+  </Accordion>
+  <Accordion title="Verify AI mode is enabled">
+    In **Clients**, check that the client has AI reply mode set to "Draft" or "Auto-Send" (not "Off").
+  </Accordion>
+  <Accordion title="Check reply category">
+    AI only generates responses for positive categories (Interested, Meeting Request, Question). OOO, bounces, and "Not Interested" don't trigger AI.
+  </Accordion>
+  <Accordion title="Verify service description exists">
+    AI needs context to generate responses. Ensure your client has a service description configured.
+  </Accordion>
+</AccordionGroup>
+
+### AI Responses Are Low Quality
+
+Improve AI response quality:
+
+1. **Add more context to service description**: Include value propositions, target audience, and typical outcomes
+2. **Configure a calendar link**: If you want AI to include booking options
+3. **Review and correct categories**: AI learns from your corrections
+
+## Category Classification Issues
+
+### Replies Being Misclassified
+
+If replies are in the wrong category:
+
+1. **Manually correct**: Open the reply and change the category
+2. **AI learns**: Your corrections improve future classifications
+3. **Ambiguous replies**: Very short or unclear replies may need manual classification
+
+### Categories Not Showing
+
+If category options are missing:
+
+1. Go to **Settings → Categories**
+2. Verify categories exist and are active
+3. Custom categories may need to be created first
+
+## Connection Issues
+
+### "Invalid API Key" Error
+
+Your sequencer API key may be incorrect or expired:
+
+<Steps>
+  <Step title="Get a new API key">
+    Log into your sequencer (Instantly, EmailBison) and generate a new API key.
+  </Step>
+  <Step title="Update the connection">
+    In Replyify, edit the connection and paste the new API key.
+  </Step>
+  <Step title="Save and test">
+    Save the changes and send a test reply to verify.
+  </Step>
+</Steps>
+
+### Connection Shows "Last Event: Never"
+
+The connection was created but hasn't received any webhooks:
+
+1. Verify webhook URL is configured in your sequencer
+2. Ensure you're sending campaigns that could receive replies
+3. Check that webhook events include "Reply" type
+4. Send a test and reply to it yourself
+
+## Account Issues
+
+### Can't Access Billing
+
+Only workspace **Admins** and **Owners** can access billing:
+
+1. Check your role in **Settings → Team**
+2. Contact your workspace admin if you need billing access
+3. Request a role change if appropriate
+
+### Can't Invite Team Members
+
+Team invitations require Admin or Owner role:
+
+1. Verify your role is Admin or Owner
+2. Members cannot invite new team members
+3. Contact your admin to send invitations
+
+### Invitation Link Expired
+
+Invitation links expire after 7 days:
+
+1. Go to **Settings → Team**
+2. Find the pending invitation
+3. Click **Resend** to send a new invitation
+
+## Performance Issues
+
+### Inbox Loading Slowly
+
+Try these optimizations:
+
+1. **Apply filters**: Reduce the number of visible replies
+2. **Archive old replies**: Clear out processed items
+3. **Check your browser**: Use Chrome, Firefox, Safari, or Edge
+4. **Clear browser cache**: Refresh with Ctrl+Shift+R (Cmd+Shift+R on Mac)
+
+### Replies Not Appearing Immediately
+
+Webhooks typically process within seconds, but may take up to 2 minutes:
+
+1. Wait 2 minutes after the reply is sent
+2. Refresh your inbox manually
+3. Check **Connections** for "Last Event" timestamp
+4. Verify the webhook is configured correctly
+
+## Getting More Help
+
+### Contact Support
+
+If you can't resolve an issue:
+
+- **Email**: [support@replyify.ai](mailto:support@replyify.ai)
+- **Include**: Your workspace name, connection details, and screenshots of any errors
+
+### Useful Information for Support
+
+When contacting support, include:
+
+1. Your workspace name
+2. Which connection/sequencer you're using
+3. Steps to reproduce the issue
+4. Screenshots of any error messages
+5. Approximate time when the issue occurred
+
+<Tip>
+Screenshots of your connection settings and webhook configuration help us troubleshoot faster.
+</Tip>

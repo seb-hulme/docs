@@ -1,0 +1,184 @@
+---
+title: "Webhook Events"
+description: "Reference for all webhook event types"
+---
+
+Subscribe to these events to receive real-time notifications from Replyify.
+
+## Available Events
+
+| Event | Description |
+|-------|-------------|
+| `reply.received` | A new reply was received from a lead |
+| `reply.categorized` | A reply was categorized by AI |
+| `reply.sent` | A response was sent to a lead |
+| `reply.forwarded` | A reply was forwarded |
+| `reply.archived` | A reply was archived |
+| `contact.created` | A new contact was created |
+
+## Event Payloads
+
+### reply.received
+
+Triggered when a new reply arrives from your email sequencer.
+
+```json
+{
+  "event": "reply.received",
+  "timestamp": "2024-01-15T14:30:00Z",
+  "workspace_id": "ws-abc123",
+  "data": {
+    "reply_id": "reply-xyz789",
+    "from_email": "john@example.com",
+    "from_name": "John Smith",
+    "to_email": "outreach@yourcompany.com",
+    "subject": "Re: Quick question about your service",
+    "body_text": "Hi, I'd love to learn more...",
+    "client_id": "client-456",
+    "connection_id": "conn-789",
+    "contact_id": "contact-012",
+    "received_at": "2024-01-15T14:30:00Z"
+  }
+}
+```
+
+### reply.categorized
+
+Triggered after AI categorizes a reply (usually within seconds of receiving).
+
+```json
+{
+  "event": "reply.categorized",
+  "timestamp": "2024-01-15T14:30:05Z",
+  "workspace_id": "ws-abc123",
+  "data": {
+    "reply_id": "reply-xyz789",
+    "category_id": "cat-interested-123",
+    "category_name": "Interested",
+    "is_positive": true,
+    "has_ai_response": true,
+    "ai_response_preview": "Hi John, Thanks for your interest..."
+  }
+}
+```
+
+### reply.sent
+
+Triggered when a response is sent to a lead.
+
+```json
+{
+  "event": "reply.sent",
+  "timestamp": "2024-01-15T15:00:00Z",
+  "workspace_id": "ws-abc123",
+  "data": {
+    "reply_id": "reply-xyz789",
+    "from_email": "john@example.com",
+    "to_email": "outreach@yourcompany.com",
+    "subject": "Re: Quick question about your service",
+    "sent_response": "Hi John,\n\nThanks for your interest...",
+    "sent_by": "user-abc",
+    "sent_at": "2024-01-15T15:00:00Z",
+    "was_auto_sent": false
+  }
+}
+```
+
+### reply.forwarded
+
+Triggered when a reply is forwarded to another email address.
+
+```json
+{
+  "event": "reply.forwarded",
+  "timestamp": "2024-01-15T15:30:00Z",
+  "workspace_id": "ws-abc123",
+  "data": {
+    "reply_id": "reply-xyz789",
+    "forwarded_to": ["sales@yourcompany.com"],
+    "forwarded_by": "user-abc",
+    "message": "Hot lead - please follow up",
+    "forwarded_at": "2024-01-15T15:30:00Z"
+  }
+}
+```
+
+### reply.archived
+
+Triggered when a reply is archived.
+
+```json
+{
+  "event": "reply.archived",
+  "timestamp": "2024-01-15T16:00:00Z",
+  "workspace_id": "ws-abc123",
+  "data": {
+    "reply_id": "reply-xyz789",
+    "archived_by": "user-abc",
+    "archived_at": "2024-01-15T16:00:00Z",
+    "previous_status": "sent"
+  }
+}
+```
+
+### contact.created
+
+Triggered when a new contact is created (first reply from a new email address).
+
+```json
+{
+  "event": "contact.created",
+  "timestamp": "2024-01-15T14:30:00Z",
+  "workspace_id": "ws-abc123",
+  "data": {
+    "contact_id": "contact-012",
+    "email": "john@example.com",
+    "first_name": "John",
+    "last_name": "Smith",
+    "company": "Example Inc",
+    "title": "VP of Sales",
+    "source_reply_id": "reply-xyz789",
+    "created_at": "2024-01-15T14:30:00Z"
+  }
+}
+```
+
+## Subscribing to Events
+
+When creating or editing a webhook, select which events to receive:
+
+1. Go to **Settings → Webhooks**
+2. Create or edit a webhook
+3. Check the events you want to receive
+4. Save the webhook
+
+<Tip>
+Subscribe only to events you need. This reduces unnecessary traffic and processing on your server.
+</Tip>
+
+## Event Ordering
+
+Events are delivered in the order they occur, but delivery is **not guaranteed to be in order**. Use the `timestamp` field to establish event sequence.
+
+<Warning>
+Events may be delivered out of order due to network conditions or retries. Design your system to handle this.
+</Warning>
+
+## Idempotency
+
+Each webhook delivery includes a unique `X-Replyify-Delivery-ID` header. Use this to detect and handle duplicate deliveries:
+
+```javascript
+const deliveryId = req.headers['x-replyify-delivery-id'];
+
+// Check if already processed
+if (await isProcessed(deliveryId)) {
+  return res.status(200).send('Already processed');
+}
+
+// Process and mark as handled
+await processEvent(req.body);
+await markProcessed(deliveryId);
+
+res.status(200).send('OK');
+```

@@ -1,0 +1,144 @@
+---
+title: "Get Contact"
+api: "GET /api/contacts/{id}"
+description: "Retrieve a specific contact by ID"
+---
+
+Fetch details of a single contact including their reply history.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier (UUID) of the contact
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="object">
+  The contact object
+  <Expandable title="Contact Object">
+    <ResponseField name="id" type="string">
+      Unique contact identifier (UUID)
+    </ResponseField>
+    <ResponseField name="email" type="string">
+      Contact's email address
+    </ResponseField>
+    <ResponseField name="first_name" type="string">
+      Contact's first name
+    </ResponseField>
+    <ResponseField name="last_name" type="string">
+      Contact's last name
+    </ResponseField>
+    <ResponseField name="company" type="string">
+      Contact's company name
+    </ResponseField>
+    <ResponseField name="title" type="string">
+      Contact's job title
+    </ResponseField>
+    <ResponseField name="linkedin_url" type="string">
+      LinkedIn profile URL (if available)
+    </ResponseField>
+    <ResponseField name="phone" type="string">
+      Phone number (if available)
+    </ResponseField>
+    <ResponseField name="metadata" type="object">
+      Additional custom fields from your sequencer
+    </ResponseField>
+    <ResponseField name="reply_count" type="integer">
+      Total number of replies from this contact
+    </ResponseField>
+    <ResponseField name="replies" type="array">
+      Recent replies from this contact
+    </ResponseField>
+    <ResponseField name="last_reply_at" type="string">
+      ISO timestamp of most recent reply
+    </ResponseField>
+    <ResponseField name="created_at" type="string">
+      ISO timestamp when contact was created
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Examples
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://app.replyify.ai/api/contacts/contact-abc123" \
+  -H "Authorization: Bearer rpl_your_api_key"
+```
+
+```javascript JavaScript
+const contactId = 'contact-abc123';
+const response = await fetch(
+  `https://app.replyify.ai/api/contacts/${contactId}`,
+  {
+    headers: {
+      'Authorization': 'Bearer rpl_your_api_key'
+    }
+  }
+);
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+contact_id = 'contact-abc123'
+response = requests.get(
+    f'https://app.replyify.ai/api/contacts/{contact_id}',
+    headers={'Authorization': 'Bearer rpl_your_api_key'}
+)
+data = response.json()
+```
+</CodeGroup>
+
+## Response Example
+
+```json
+{
+  "data": {
+    "id": "contact-abc123",
+    "email": "john@example.com",
+    "first_name": "John",
+    "last_name": "Smith",
+    "company": "Example Inc",
+    "title": "VP of Sales",
+    "linkedin_url": "https://linkedin.com/in/johnsmith",
+    "phone": "+1-555-123-4567",
+    "metadata": {
+      "industry": "Technology",
+      "company_size": "100-500"
+    },
+    "reply_count": 3,
+    "replies": [
+      {
+        "id": "reply-xyz789",
+        "subject": "Re: Partnership opportunity",
+        "status": "sent",
+        "category": "Meeting Request",
+        "received_at": "2024-01-15T14:30:00Z"
+      },
+      {
+        "id": "reply-xyz456",
+        "subject": "Re: Quick question",
+        "status": "sent",
+        "category": "Interested",
+        "received_at": "2024-01-12T10:15:00Z"
+      }
+    ],
+    "last_reply_at": "2024-01-15T14:30:00Z",
+    "created_at": "2024-01-10T09:00:00Z"
+  }
+}
+```
+
+## Errors
+
+<ResponseField name="404 Not Found">
+  ```json
+  {
+    "error": "Contact not found"
+  }
+  ```
+  The specified contact ID doesn't exist in your workspace.
+</ResponseField>
